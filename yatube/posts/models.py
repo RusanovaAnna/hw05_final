@@ -1,4 +1,3 @@
-from tabnanny import verbose
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -37,7 +36,7 @@ class Post(models.Model):
         'Картинка',
         upload_to='posts/',
         blank=True
-    )  
+    )
 
     def __str__(self):
         return self.text[:NUM_SIGN]
@@ -62,7 +61,7 @@ class Comment(models.Model):
         Post,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name = 'Пост',
+        verbose_name ='Пост',
     )
     author = models.ForeignKey(
         User,

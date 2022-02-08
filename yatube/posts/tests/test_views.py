@@ -123,32 +123,27 @@ class PostViewsTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
-    
+
     def test_cache_index_page_correct_context(self):
         response = self.authorized_client.get(reverse('posts:index'))
-        context = response.context['page_obj']
         content = response.content
         post_id = PostViewsTests.post.id
         instance = Post.objects.get(pk=post_id)
         instance.delete()
         new_response = self.authorized_client.get(reverse('posts:index'))
-        new_context = new_response.context['page_obj']
         new_content = new_response.content
         self.assertEqual(content, new_content)
         cache.clear()
         new_response_new = self.authorized_client.get(reverse('posts:index'))
         new_content_new = new_response_new.content
         self.assertNotEqual(content, new_content_new)
-    
+
     def test_user_can_follow(self):
         author = PostViewsTests.user
         user = self.user
-        response = self.authorized_client.get(
-            reverse(
-                'posts:profile_follow', kwargs={'username': author.username}
-            )
-        )
-        self.assertTrue(Follow.objects.filter(author=author, user=user).exists())
+        self.assertTrue(
+            Follow.objects.filter(author=author, user=user
+        ).exists())
 
 
 class PaginatorViewsTest(TestCase):

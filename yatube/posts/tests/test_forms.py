@@ -48,7 +48,7 @@ class PostFormTests(TestCase):
             image=cls.uploaded_img,
         )
         cls.form = PostForm()
-    
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -122,11 +122,11 @@ class TestCommentForm(TestCase):
             text='Тестовый текст поста',
         )
         cls.form = CommentForm()
-    
+
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-    
+
     def test_add_comment(self):
         comment_count = Comment.objects.count()
         form_data = {

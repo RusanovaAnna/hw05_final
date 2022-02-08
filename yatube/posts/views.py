@@ -1,4 +1,3 @@
-from linecache import cache
 from django.core.paginator import Paginator
 
 from django.contrib.auth.decorators import login_required
@@ -46,7 +45,8 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     if (author != request.user and Follow.objects.filter(
         author=author,
-        user=request.user).exists()):
+        user=request.user
+    ).exists()):
         following = True
     else:
         following = False
@@ -124,7 +124,7 @@ def add_comment(request, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
-    return redirect('posts:post_detail', post_id=post_id) 
+    return redirect('posts:post_detail', post_id=post_id)
 
 
 @login_required
@@ -138,6 +138,7 @@ def follow_index(request):
         'page_obj': page_obj,
     }
     return render(request, 'posts/follow.html', context)
+
 
 @login_required
 def profile_follow(request, username):
@@ -153,7 +154,7 @@ def profile_follow(request, username):
             author=author,
         )
     return redirect('posts:profile', username=username)
-    
+
 
 @login_required
 def profile_unfollow(request, username):
