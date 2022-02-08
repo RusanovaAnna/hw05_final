@@ -142,8 +142,10 @@ class PostViewsTests(TestCase):
         author = PostViewsTests.user
         user = self.user
         self.assertTrue(
-            Follow.objects.filter(author=author, user=user
-        ).exists())
+            Follow.objects.filter(
+                author=author,
+                user=user
+            ).exists())
 
 
 class PaginatorViewsTest(TestCase):
