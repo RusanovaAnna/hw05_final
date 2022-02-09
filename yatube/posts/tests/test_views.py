@@ -167,7 +167,7 @@ class PostViewsTests(TestCase):
     # def test_follow_page_for_follower(self):
     # self.authorized_client.get(
     # reverse(
-    # 'posts:profile_follow', 
+    # 'posts:profile_follow',
     # kwargs={'username': self.post.author.username}
     # )
     # )
