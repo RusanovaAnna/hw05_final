@@ -66,7 +66,6 @@ class PostFormTests(TestCase):
         form_data = {
             'group': self.group.id,
             'text': 'Тестовый текст поста',
-            'image': self.image,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -84,7 +83,6 @@ class PostFormTests(TestCase):
                 text='Тестовый текст поста',
                 author=PostFormTests.user,
                 group=PostFormTests.group,
-                image=self.post.image
             ).exists()
         )
 
