@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Post, Group, Follow
+from posts.models import Post, Group
 from posts.forms import PostForm
 from posts.views import QUANTITY_POSTS
 
@@ -152,28 +152,29 @@ class PostViewsTests(TestCase):
         new_content_new = new_response_new.content
         self.assertNotEqual(content, new_content_new)
 
-   # def test_user_can_follow(self):
-       # author = self.user1
-       # user = self.user
-        # response = self.authorized_client.get(
-        # reverse(
-        # 'posts:profile_follow', kwargs={'username': author.username}))
-       # self.assertTrue(
-          # Follow.objects.filter(
-              # author=author,
-               # user=user
-            # ).exists())
-    
-   # def test_follow_page_for_follower(self):
-       # self.authorized_client.get(
-          # reverse(
-               # 'posts:profile_follow', kwargs={'username': self.post.author.username}
-           # )
-       # )
-       # response = self.authorized_client.get(
-           # reverse('posts:follow_index')
-       # )
-       # self.assertEqual(response.context['page_obj'], self.post.id)
+    # def test_user_can_follow(self):
+    # author = self.user1
+    # user = self.user
+    # response = self.authorized_client.get(
+    # reverse(
+    # 'posts:profile_follow', kwargs={'username': author.username}))
+    # self.assertTrue(
+    # Follow.objects.filter(
+    # author=author,
+    # user=user
+    # ).exists())
+
+    # def test_follow_page_for_follower(self):
+    # self.authorized_client.get(
+    # reverse(
+    # 'posts:profile_follow', 
+    # kwargs={'username': self.post.author.username}
+    # )
+    # )
+    # response = self.authorized_client.get(
+    # reverse('posts:follow_index')
+    # )
+    # self.assertEqual(response.context['page_obj'], self.post.id)
 
 
 class PaginatorViewsTest(TestCase):

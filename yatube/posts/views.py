@@ -101,7 +101,7 @@ def post_create(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     form = PostForm(
-        request.POST, 
+        request.POST,
         instance=post,
         files=request.FILES or None
     )
@@ -110,8 +110,8 @@ def post_edit(request, post_id):
         post = form.save(commit=False)
         post.save()
         return redirect('posts:post_detail', post_id=post_id)
-    return render(request, 'posts/create_post.html', 
-                  {'form': form, 'is_edit': True}) 
+    return render(request, 'posts/create_post.html',
+                  {'form': form, 'is_edit': True})
 
 
 @login_required
