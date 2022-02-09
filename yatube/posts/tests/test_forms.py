@@ -28,7 +28,7 @@ class PostFormTests(TestCase):
             slug='test_slug_1',
             description='Тестовое описание 1'
         )
-        image = (
+        cls.image = (
             b'\x47\x49\x46\x38\x39\x61\x01\x00'
             b'\x01\x00\x00\x00\x00\x21\xf9\x04'
             b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
@@ -37,7 +37,7 @@ class PostFormTests(TestCase):
         )
         cls.uploaded_img = SimpleUploadedFile(
             name='test.jpg',
-            content=image,
+            content=cls.image,
             content_type='image/gif'
         )
         cls.post = Post.objects.create(
@@ -66,7 +66,7 @@ class PostFormTests(TestCase):
         form_data = {
             'group': self.group.id,
             'text': 'Тестовый текст поста',
-            'image': self.post.image,
+            'image': self.image,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -84,6 +84,7 @@ class PostFormTests(TestCase):
                 text='Тестовый текст поста',
                 author=PostFormTests.user,
                 group=PostFormTests.group,
+                image=self.post.image
             ).exists()
         )
 
@@ -91,7 +92,7 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'Тестовый текст новый',
             'group': self.group1.id,
-            'image': self.post.image,
+            'image': self.image
         }
         response = self.authorized_client_author.post(
             reverse('posts:post_edit', kwargs={'post_id': self.post.id}),
@@ -108,6 +109,7 @@ class PostFormTests(TestCase):
                 text='Тестовый текст новый',
                 id=self.post.id,
                 group=PostFormTests.group1,
+                image=self.post.image
             ).exists()
         )
 
@@ -124,6 +126,7 @@ class TestCommentForm(TestCase):
         cls.form = CommentForm()
 
     def setUp(self):
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 

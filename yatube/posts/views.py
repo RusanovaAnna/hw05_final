@@ -42,10 +42,11 @@ def group_posts(request, slug):
 
 def profile(request, username):
     title = 'Профайл пользователя ' + username
+    user = request.user
     author = get_object_or_404(User, username=username)
-    if (author != request.user and Follow.objects.filter(
+    if (user.is_authenticated and author != user and Follow.objects.filter(
         author=author,
-        user=request.user
+        user=user
     ).exists()):
         following = True
     else:
@@ -79,7 +80,10 @@ def post_detail(request, post_id):
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(
+        request.POST or None, 
+        files=request.FILES or None,
+    )
     if form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
@@ -101,8 +105,8 @@ def post_edit(request, post_id):
 
     form = PostForm(
         request.POST or None,
+        instance=post,
         files=request.FILES or None,
-        instance=post
     )
     if form.is_valid():
         form.save()
@@ -129,13 +133,18 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    request.user = Follow.objects.filter(user=request.user).exists()
-    posts = Post.objects.filter(author=request.user)
+    user = request.user
+    follow = user.follower.all()
+    author = User.objects.filter(following__in=follow).all()
+    posts = Post.objects.filter(author__in=author).all() 
+    # posts = follow.author.posts.all()
     paginator = Paginator(posts, QUANTITY_POSTS)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    title = 'Подписки пользователя '
     context = {
         'page_obj': page_obj,
+        'title': title,
     }
     return render(request, 'posts/follow.html', context)
 

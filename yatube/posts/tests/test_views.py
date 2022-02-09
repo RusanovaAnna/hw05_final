@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -24,10 +25,23 @@ class PostViewsTests(TestCase):
             slug='test_slug',
             description='Тестовое описание'
         )
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00'
+            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
+            b'\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        cls.uploaded_img = SimpleUploadedFile(
+            name='test.jpg',
+            content=image,
+            content_type='image/gif'
+        )
         cls.post = Post.objects.create(
             text='Тестовый текст',
             author=cls.user,
             group=cls.group,
+            image=cls.uploaded_img,
         )
         cls.post1 = Post.objects.create(
             text='Тестовый текст 1',
@@ -64,7 +78,7 @@ class PostViewsTests(TestCase):
 
     def test_views_uses_correct_template_create(self):
         response = self.authorized_client_author.get(reverse(
-            'posts:post_edit', kwargs={'post_id': self.post.id})
+            'posts:post_edit', kwargs={'post_id': self.post1.id})
         )
         self.assertTemplateUsed(response, 'posts/create_post.html')
 
@@ -97,7 +111,7 @@ class PostViewsTests(TestCase):
     def test_post_edit_pages_show_correct_context(self):
         """Шаблон post_edit сформирован с правильным контекстом."""
         response = self.authorized_client_author.get(
-            reverse('posts:post_edit', kwargs={'post_id': self.post.id})
+            reverse('posts:post_edit', kwargs={'post_id': self.post1.id})
         )
         form_fields = {
             'group': forms.models.ModelChoiceField,
@@ -106,7 +120,7 @@ class PostViewsTests(TestCase):
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
+                form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
     def test_post_create_pages_show_correct_context(self):
@@ -139,8 +153,13 @@ class PostViewsTests(TestCase):
         self.assertNotEqual(content, new_content_new)
 
     def test_user_can_follow(self):
-        author = PostViewsTests.user
-        user = self.user
+        author = self.user
+        user = self.user1
+        response = self.authorized_client.get(
+            reverse(
+                'posts:profile_follow', kwargs={'username': author.username}
+            )
+        )
         self.assertTrue(
             Follow.objects.filter(
                 author=author,
@@ -152,7 +171,7 @@ class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(username='auth')
+        cls.user = User.objects.create(username='Yana')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
