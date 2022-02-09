@@ -81,7 +81,7 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     form = PostForm(
-        request.POST or None, 
+        request.POST or None,
         files=request.FILES or None,
     )
     if form.is_valid():
@@ -136,7 +136,7 @@ def follow_index(request):
     user = request.user
     follow = user.follower.all()
     author = User.objects.filter(following__in=follow).all()
-    posts = Post.objects.filter(author__in=author).all() 
+    posts = Post.objects.filter(author__in=author).all()
     # posts = follow.author.posts.all()
     paginator = Paginator(posts, QUANTITY_POSTS)
     page_number = request.GET.get('page')

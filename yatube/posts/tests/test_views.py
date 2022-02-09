@@ -155,11 +155,11 @@ class PostViewsTests(TestCase):
     def test_user_can_follow(self):
         author = self.user
         user = self.user1
-        response = self.authorized_client.get(
-            reverse(
-                'posts:profile_follow', kwargs={'username': author.username}
-            )
-        )
+        #response = self.authorized_client.get(
+            #reverse(
+                #'posts:profile_follow', kwargs={'username': author.username}
+           #)
+        #)
         self.assertTrue(
             Follow.objects.filter(
                 author=author,
