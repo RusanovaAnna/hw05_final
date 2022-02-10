@@ -158,7 +158,7 @@ class TestCommentForm(TestCase):
         )
         self.assertEqual(Comment.objects.count(), comment_count + 1)
 
-    def test_not_add_comment(self):    
+    def test_not_add_comment(self):
         comment_count = Comment.objects.count()
         form_data = {
             'text': 'Тестовый текст comment 1'

@@ -99,7 +99,7 @@ class Follow(models.Model):
         related_name='follower',
         verbose_name='Пользователь',
     )
-    
+
     class UniqueConstraint():
-        fields=['author', 'user'], 
-        name='unique_follow'
+        fields = ['author', 'user'],
+        name = 'unique_follow'

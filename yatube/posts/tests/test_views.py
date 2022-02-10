@@ -62,7 +62,7 @@ class PostViewsTests(TestCase):
         self.authorized_client_author = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_author.force_login(self.user1)
-    
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -176,7 +176,7 @@ class PostViewsTests(TestCase):
             response,
             reverse('posts:profile', kwargs={'username': author})
         )
-    
+
     def test_user_can_unfollow(self):
         author = self.user1
         response = self.authorized_client.get(
@@ -195,7 +195,7 @@ class PostViewsTests(TestCase):
             response,
             reverse('posts:profile', kwargs={'username': author})
         )
-    
+
     def test_user_cant_follow(self):
         author = self.user1
         follow_count = Follow.objects.count()
@@ -207,9 +207,10 @@ class PostViewsTests(TestCase):
         self.assertNotEqual(Follow.objects.count(), follow_count + 1)
         self.assertRedirects(
             response,
-            f"{reverse('users:login')}?next=/profile/{self.post1.author}/follow/"
+            f"{reverse('users:login')}?next=/profile/"
+            f"{self.post1.author}/follow/"
         )
-    
+
     def test_user_cant_follow_on_myself(self):
         author = self.user
         follow_count = Follow.objects.count()
@@ -224,7 +225,8 @@ class PostViewsTests(TestCase):
         for post in Post.objects.all():
             if 'author_id' == self.user:
                 response = self.authorized_client.get(reverse(
-                    'posts:profile_folow', kwargs={'username': self.post.author}
+                    'posts:profile_folow',
+                    kwargs={'username': self.post.author}
                 ))
                 page_obj = response.context['page_obj']
                 self.assertIn(post, page_obj)
