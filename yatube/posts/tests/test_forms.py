@@ -157,3 +157,27 @@ class TestCommentForm(TestCase):
             ).exists()
         )
         self.assertEqual(Comment.objects.count(), comment_count + 1)
+
+    def test_not_add_comment(self):    
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый текст comment 1'
+        }
+        response = self.guest_client.post(
+            reverse(
+                'posts:add_comment', kwargs={'post_id': self.post.pk}
+            ),
+            data=form_data,
+            follow=True,
+            id=self.post.pk
+        )
+        self.assertRedirects(
+            response,
+            f"{reverse('users:login')}?next=/posts/{self.post.pk}/comment/"
+        )
+        self.assertFalse(
+            Comment.objects.filter(
+                text='Тестовый текст comment 1'
+            ).exists()
+        )
+        self.assertNotEqual(Comment.objects.count(), comment_count + 1)

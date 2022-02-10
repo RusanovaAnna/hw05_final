@@ -15,9 +15,7 @@ QUANTITY_POSTS = 10
 def index(request):
     posts = Post.objects.select_related('group', 'author')
     title = 'Последние обновления на сайте'
-    paginator = Paginator(posts, QUANTITY_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator(request, posts)
     context = {
         'page_obj': page_obj,
         'title': title,
@@ -29,9 +27,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.order_by()
     title = 'Записи сообщества ' + group.title
-    paginator = Paginator(posts, QUANTITY_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator(request, posts)
     context = {
         'page_obj': page_obj,
         'group': group,
@@ -42,19 +38,11 @@ def group_posts(request, slug):
 
 def profile(request, username):
     title = 'Профайл пользователя ' + username
-    user = request.user
     author = get_object_or_404(User, username=username)
-    if (user.is_authenticated and author != user and Follow.objects.filter(
-        author=author,
-        user=user
-    ).exists()):
-        following = True
-    else:
-        following = False
+    following = (request.user.is_authenticated and
+        author != request.user and author.following.exists)
     posts = author.posts.all()
-    paginator = Paginator(posts, QUANTITY_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator(request, posts)
     context = {
         'title': title,
         'page_obj': page_obj,
@@ -128,14 +116,11 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    user = request.user
-    follow = user.follower.all()
-    author = User.objects.filter(following__in=follow).all()
+    author = User.objects.filter(
+        following__in=request.user.follower.all()
+    ).all()
     posts = Post.objects.filter(author__in=author).all()
-    # posts = follow.author.posts.all()
-    paginator = Paginator(posts, QUANTITY_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator(request, posts)
     title = 'Подписки пользователя '
     context = {
         'page_obj': page_obj,
@@ -148,12 +133,11 @@ def follow_index(request):
 def profile_follow(request, username):
     """Подписаться на автора"""
     author = get_object_or_404(User, username=username)
-    follow = Follow.objects.filter(
-        user=request.user,
-        author=author
-    )
-    if (request.user != author and not follow.exists()):
-        Follow.objects.create(
+    if author != request.user:
+        Follow.objects.filter(
+            user=request.user,
+            author=author
+        ).get_or_create(
             user=request.user,
             author=author,
         )
@@ -163,13 +147,19 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    follow = Follow.objects.filter(
+    Follow.objects.filter(
         user=request.user,
         author=author
     )
-    if request.user != author and follow.exists():
+    if request.user != author:
         Follow.objects.filter(
             user=request.user,
             author=author,
         ).delete()
     return redirect('posts:profile', username=username)
+
+
+def paginator(request, posts):
+    paginator = Paginator(posts, QUANTITY_POSTS)
+    page_number = request.GET.get('page')
+    return paginator.get_page(page_number)

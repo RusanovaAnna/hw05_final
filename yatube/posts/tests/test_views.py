@@ -1,19 +1,25 @@
+import shutil
+import tempfile
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django import forms
 
-from posts.models import Post, Group
+from posts.models import Post, Group, Follow
 from posts.forms import PostForm
+from django.conf import settings
 from posts.views import QUANTITY_POSTS
 
 User = get_user_model()
 
 SIZE = 13
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostViewsTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -56,6 +62,11 @@ class PostViewsTests(TestCase):
         self.authorized_client_author = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_author.force_login(self.user1)
+    
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_views_uses_correct_template(self):
         templates_pages_names = {
@@ -152,29 +163,71 @@ class PostViewsTests(TestCase):
         new_content_new = new_response_new.content
         self.assertNotEqual(content, new_content_new)
 
-    # def test_user_can_follow(self):
-    # author = self.user1
-    # user = self.user
-    # response = self.authorized_client.get(
-    # reverse(
-    # 'posts:profile_follow', kwargs={'username': author.username}))
-    # self.assertTrue(
-    # Follow.objects.filter(
-    # author=author,
-    # user=user
-    # ).exists())
+    def test_user_can_follow(self):
+        author = self.user1
+        follow_count = Follow.objects.count()
+        response = self.authorized_client.get(
+            reverse(
+                'posts:profile_follow', kwargs={'username': author}
+            )
+        )
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertRedirects(
+            response,
+            reverse('posts:profile', kwargs={'username': author})
+        )
+    
+    def test_user_can_unfollow(self):
+        author = self.user1
+        response = self.authorized_client.get(
+            reverse(
+                'posts:profile_follow', kwargs={'username': author}
+            )
+        )
+        follow_count = Follow.objects.count()
+        response = self.authorized_client.get(
+            reverse(
+                'posts:profile_unfollow', kwargs={'username': author}
+            )
+        )
+        self.assertEqual(Follow.objects.count(), follow_count - 1)
+        self.assertRedirects(
+            response,
+            reverse('posts:profile', kwargs={'username': author})
+        )
+    
+    def test_user_cant_follow(self):
+        author = self.user1
+        follow_count = Follow.objects.count()
+        response = self.guest_client.get(
+            reverse(
+                'posts:profile_follow', kwargs={'username': author}
+            )
+        )
+        self.assertNotEqual(Follow.objects.count(), follow_count + 1)
+        self.assertRedirects(
+            response,
+            f"{reverse('users:login')}?next=/profile/{self.post1.author}/follow/"
+        )
+    
+    def test_user_cant_follow_on_myself(self):
+        author = self.user
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow', kwargs={'username': author}
+            )
+        )
+        self.assertNotEqual(Follow.objects.count(), follow_count + 1)
 
-    # def test_follow_page_for_follower(self):
-    # self.authorized_client.get(
-    # reverse(
-    # 'posts:profile_follow',
-    # kwargs={'username': self.post.author.username}
-    # )
-    # )
-    # response = self.authorized_client.get(
-    # reverse('posts:follow_index')
-    # )
-    # self.assertEqual(response.context['page_obj'], self.post.id)
+    def test_follow_page_for_follower(self):
+        for post in Post.objects.all():
+            if 'author_id' == self.user:
+                response = self.authorized_client.get(reverse(
+                    'posts:profile_folow', kwargs={'username': self.post.author}
+                ))
+                page_obj = response.context['page_obj']
+                self.assertIn(post, page_obj)
 
 
 class PaginatorViewsTest(TestCase):

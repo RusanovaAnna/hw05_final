@@ -5,7 +5,7 @@
         <h1>Подписки</h1>
         <ul>
         </ul>
-        {% include 'posts/includes/switcher.html' with follow=True %}
+        {% include 'includes/switcher.html' with follow=True %}
         {% for post in page_obj %}
           <article>
             <ul>
@@ -35,6 +35,6 @@
           <hr>
           {% endif %}
         {% endfor %}
-        {% include 'posts/includes/paginator.html' %}
+        {% include 'includes/paginator.html' %}
       </div>  
     {% endblock %}

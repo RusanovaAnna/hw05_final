@@ -8,7 +8,7 @@
         <h1>Последние обновления на сайте</h1>
         <ul>
         </ul>
-        {% include 'posts/includes/switcher.html' with index=True %}
+        {% include 'includes/switcher.html' with index=True %}
         {% for post in page_obj %}
           <article>
             <ul>
@@ -39,6 +39,6 @@
           {% endif %}
         {% endfor %}
     {% endcache %}
-        {% include 'posts/includes/paginator.html' %}
+        {% include 'includes/paginator.html' %}
       </div>  
     {% endblock %}
