@@ -106,4 +106,4 @@ class Follow(models.Model):
                 fields=['user', 'author'],
                 name='unique_author_user_following'
             )
-        ] 
+        ]
