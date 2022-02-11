@@ -117,10 +117,9 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    author = User.objects.filter(
-        following__in=request.user.follower.all()
-    ).all()
-    posts = Post.objects.filter(author__in=author).all()
+    posts = Post.objects.filter(
+        author__following__user=request.user
+    )
     page_obj = paginator(request, posts)
     title = 'Подписки пользователя '
     context = {
@@ -135,10 +134,7 @@ def profile_follow(request, username):
     """Подписаться на автора"""
     author = get_object_or_404(User, username=username)
     if author != request.user:
-        Follow.objects.filter(
-            user=request.user,
-            author=author
-        ).get_or_create(
+        Follow.objects.get_or_create(
             user=request.user,
             author=author,
         )
@@ -148,10 +144,6 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(
-        user=request.user,
-        author=author
-    )
     if request.user != author:
         Follow.objects.filter(
             user=request.user,

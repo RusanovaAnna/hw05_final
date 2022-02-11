@@ -180,4 +180,4 @@ class TestCommentForm(TestCase):
                 text='Тестовый текст comment 1'
             ).exists()
         )
-        self.assertNotEqual(Comment.objects.count(), comment_count + 1)
+        self.assertEqual(Comment.objects.count(), comment_count)

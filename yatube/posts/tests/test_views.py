@@ -179,10 +179,9 @@ class PostViewsTests(TestCase):
 
     def test_user_can_unfollow(self):
         author = self.user1
-        response = self.authorized_client.get(
-            reverse(
-                'posts:profile_follow', kwargs={'username': author}
-            )
+        Follow.objects.create(
+            user=self.user,
+            author=author
         )
         follow_count = Follow.objects.count()
         response = self.authorized_client.get(

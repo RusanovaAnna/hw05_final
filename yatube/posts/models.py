@@ -100,6 +100,10 @@ class Follow(models.Model):
         verbose_name='Пользователь',
     )
 
-    class UniqueConstraint():
-        fields = ['author', 'user'],
-        name = 'unique_follow'
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_author_user_following'
+            )
+        ] 
